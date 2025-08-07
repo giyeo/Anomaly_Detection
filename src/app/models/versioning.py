@@ -1,4 +1,4 @@
-from model import AnomalyDetectionModel
+from app.models.anomaly_model import AnomalyDetectionModel
 from collections import defaultdict
 from typing import Dict, List, Tuple
 

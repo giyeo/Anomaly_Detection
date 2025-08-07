@@ -1,5 +1,5 @@
 import numpy as np
-from objects import DataPoint, TimeSeries
+from app.models.objects import DataPoint, TimeSeries
 
 class AnomalyDetectionModel:
 

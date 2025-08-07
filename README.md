@@ -8,12 +8,24 @@ try plotly.express maybe
 ## Dev stuff
 uvicorn controller:app --host 0.0.0.0 --port 8000 --reload
 
+PYTHONPATH=src uvicorn app.main:app --reload
+
 http://localhost:8000/docs
 
 http://localhost:8000/openapi.json
 
+
+docker-compose build
+
+docker-compose up
+
+http://localhost:8000/docs
+
+
 ## TODO
-- Organize the files in the structured manner.
+make sure persistence will work on containered app.
+
+## TODO
 - Rename file, variables, and stuff.
 - Implement SQLlite to allow disk persistency. (not only in-memory)
 - Create scripts for both dockerfile and compose.
@@ -41,8 +53,10 @@ Report system-level performance metrics (latency, load)
 Optional
 Performance Testing: Include benchmarking results under load (e.g. 100 parallel inferences)
 - can work on it
+
 Preflight Validation: Reject training data that is insufficient, constant, or invalid
-- need to think about it
+- Done
+
 Visualization Tool: Provide a /plot?series_id=sensor_XYZ&version=v3endpoint to show training data
 - already kinda have it, work on it.
 Model Versioning: Support retraining of the same series_id, versioning each model

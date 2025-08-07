@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anomaly_detection_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/database/persistence
+    environment:
+      - PYTHONPATH=/app/src
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

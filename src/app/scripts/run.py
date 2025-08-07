@@ -21,7 +21,3 @@ toPredict = value=random.uniform(-150, 150)
 print(f"Predict this {toPredict}")
 res = model.predict(DataPoint(timestamp=int(time()), value=toPredict))
 print(res)
-
-
-
-
