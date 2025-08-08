@@ -11,4 +11,4 @@ class ModelMetadata(Base):
     mean = Column(Float)
     std = Column(Float)
     trained_at = Column(DateTime, default=datetime.utcnow)
-    model_path = Column(String)
+    points_used = Column(Integer)

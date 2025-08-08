@@ -1,63 +1,95 @@
-# Anomaly_Detection
-Anomaly Detection with Python
+# 🧠 Anomaly Detection API
 
-pip freeze vs requirements.txt comparison with git hooks,
-try plotly.express maybe
+A FastAPI-based service for detecting anomalies in univariate time series using a simple statistical model.  
+Supports multiple `series_id`s with versioning, live inference, and benchmarking.
 
+---
 
-## Dev stuff
-uvicorn controller:app --host 0.0.0.0 --port 8000 --reload
+## 🚀 Features
 
+- Train anomaly detection models on timestamped series data (`/fit`)
+- Predict if a point is anomalous (`/predict`)
+- Support for model versioning and multiple series
+- Built-in `/healthcheck` metrics
+- Optional Docker & benchmarking tools
+- Visualization endpoint (if enabled): `/plot`
+
+---
+
+## 🧪 Quickstart
+
+### 🔧 Local Setup (Python 3.13+)
+```bash
+python3.13 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 PYTHONPATH=src uvicorn app.main:app --reload
+```
 
-http://localhost:8000/docs
+### Run with Docker (Optional)
+docker-compose up --build
 
-http://localhost:8000/openapi.json
-
-
-docker-compose build
-
-docker-compose up
-
-http://localhost:8000/docs
+### Access the API:
+Swagger Docs: localhost:8000/docs
 
 
-## TODO
-make sure persistence will work on containered app.
+## 📊 Benchmarking
+- A sample.csv is included to simulate training and testing.
+- You can generate a new sample with:
 
-## TODO
-- Rename file, variables, and stuff.
-- Implement SQLlite to allow disk persistency. (not only in-memory)
-- Create scripts for both dockerfile and compose.
-- Improve readme
-- Create a Benchmark based on both test-fit and test-predict (use the health check as well)
+```bash
+python _create_sample.py
+python _benchmark.py
+```
 
-All the app is running and persisting only in-memory (for now).
-Allow to persist in SQLlite. but use in-memory as a cache to allow read prediction performance
-You can kinda cache evict the in-memory artifact, in order for it to fetch form db once in a while.
+### What the benchmark does:
+- Trains the model on the sample
+- Runs 5,000 inferences using 100 parallel workers
 
-Features
-Train anomaly detection models from timestamped values via API
-- Done
-Maintain separate models per series_id with versioning support
-- Done 
-Persist trained models for reuse
-- Done
-Predict if new points are anomalous given a series_id
-- Done
-Return model version and prediction
-- Done
-Report system-level performance metrics (latency, load)
-- Done
+Example output:
+```json
+Starting benchmark for predict requests...
+Number of requests: 5000
+Health Check Response:
+{
+  'series_trained': 1,
+  'inference_latency_ms': {'avg': 5.2, 'p95': 26.1},
+  'training_latency_ms': {'avg': 12.3, 'p95': 12.3}
+}
+Benchmarking completed in 11.87 seconds.
+Requests per second: 421.20
+```
 
-Optional
-Performance Testing: Include benchmarking results under load (e.g. 100 parallel inferences)
-- can work on it
+## 📡 Example cURL Requests
 
-Preflight Validation: Reject training data that is insufficient, constant, or invalid
-- Done
-
-Visualization Tool: Provide a /plot?series_id=sensor_XYZ&version=v3endpoint to show training data
-- already kinda have it, work on it.
-Model Versioning: Support retraining of the same series_id, versioning each model
-- Done
+### ✅ Health Check
+```bash
+curl http://localhost:8000/healthcheck
+```
+📥 Predict Anomaly (specific version)
+```bash
+curl -X POST 'http://localhost:8000/predict/sensor_1?version=17' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "timestamp": "1691000240",
+    "value": 18
+}'
+```
+📥 Predict Anomaly (latest version)
+```bash
+curl -X POST 'http://localhost:8000/predict/sensor_1' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "timestamp": "1691000240",
+    "value": 18
+}'
+```
+🧠 Train a New Model
+```bash
+curl -X POST http://localhost:8000/fit/sensor_1 \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "timestamps": [1691000000, 1691000060, 1691000120, 1691000180, 1691000240],
+    "values": [10, 11, 9, 12, 15]
+}'
+```

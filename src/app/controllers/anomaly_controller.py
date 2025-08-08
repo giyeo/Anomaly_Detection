@@ -4,11 +4,11 @@ from typing import List, Optional
 import time
 from collections import defaultdict
 import numpy as np
-from app.models.versioning import ModelVersioning
+from app.services.versioning_service import ModelVersioning
 from app.models.anomaly_model import AnomalyDetectionModel
 from app.models.objects import TimeSeries, DataPoint
 from app.schemas.api_schemas import TrainData, TrainResponse, PredictData, PredictResponse, Metrics, HealthCheckResponse
-from app.services.anomaly_service import train_model, predict_model
+from app.services.anomaly_service import train_model, predict_model, model_info
 
 # -----------------------------
 # Initialize App
@@ -47,13 +47,14 @@ def predict(
 
     latency = (time.time() - start_time) * 1000
     inference_latencies.append(latency)
+    print(f"Appended inference latency: {latency}, total: {len(inference_latencies)}")
 
     return response
 
 
 @router.get("/healthcheck", response_model=HealthCheckResponse, tags=["Health Check"])
 def health_check():
-    series_trained = sum(len(v) for v in model_registry.models.values())
+    series_trained = model_info()
 
     def calc_metrics(latencies):
         if not latencies:
@@ -65,8 +66,9 @@ def health_check():
     return HealthCheckResponse(
         series_trained=series_trained,
         inference_latency_ms=calc_metrics(inference_latencies),
-        training_latency_ms=calc_metrics(training_latencies),
+        training_latency_ms=calc_metrics(training_latencies)
     )
+
 
 def validate_training_data(timestamps, values, min_points=5, constancy_eps=1e-6):
     if not timestamps or not values:
@@ -74,7 +76,7 @@ def validate_training_data(timestamps, values, min_points=5, constancy_eps=1e-6)
     
     if len(timestamps) != len(values):
         raise HTTPException(status_code=422, detail="Timestamps and values length mismatch.")
-    
+
     if len(values) < min_points:
         raise HTTPException(status_code=422, detail=f"At least {min_points} points required.")
 
